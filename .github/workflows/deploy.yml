@@ -1,0 +1,32 @@
+name: Deploy to Ec2HtmlYml
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Hacer checkout del código
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      # Paso 2: Configurar la clave SSH para conectarse a la EC2
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.Ec2HtmlYml }}" > ~/.ssh/id_rsa  # Cargar la clave privada desde los secretos
+          chmod 600 ~/.ssh/id_rsa  # Asegurarse de que los permisos sean correctos
+          ssh-keyscan -H 3.91.152.216 >> ~/.ssh/known_hosts  # Agregar la dirección IP de la instancia EC2
+
+      # Paso 3: Conectarse a EC2 y desplegar los archivos
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@3.91.152.216 << 'EOF'
+            cd /home/ec2-user/downloads/  # O el directorio que estés utilizando
+            git pull origin main  # Obtener los cambios más recientes del repositorio
+            sudo systemctl restart nginx  # Reiniciar Nginx si es necesario
+          EOF  
