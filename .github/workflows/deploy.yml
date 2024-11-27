@@ -29,9 +29,10 @@ jobs:
           ssh -o StrictHostKeyChecking=no ec2-user@34.239.0.46 << 'EOF'
             cd /home/ec2-user/Ec2HtmlYml || git clone https://github.com/meybili19/Ec2HtmlYml.git
             cd Ec2HtmlYml
-            git pull origin main  # Actualizar los archivos del repositorio
-            sudo cp index.html /var/www/html/  # Copiar index.html al directorio de Nginx
-            sudo systemctl restart nginx  # Reiniciar Nginx
+            git pull origin main
+            sudo cp index.html /var/www/html/
+            sudo cp instance-ip.php /var/www/html/
+            sudo systemctl restart nginx
           EOF
 
       # Paso 4: Desplegar los archivos en la segunda instancia EC2
@@ -40,7 +41,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no ec2-user@44.201.131.252 << 'EOF'
             cd /home/ec2-user/Ec2HtmlYml || git clone https://github.com/meybili19/Ec2HtmlYml.git
             cd Ec2HtmlYml
-            git pull origin main  # Actualizar los archivos del repositorio
-            sudo cp index.html /var/www/html/  # Copiar index.html al directorio de Nginx
-            sudo systemctl restart nginx  # Reiniciar Nginx
+            git pull origin main
+            sudo cp index.html /var/www/html/
+            sudo cp instance-ip.php /var/www/html/
+            sudo systemctl restart nginx
           EOF
