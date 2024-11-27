@@ -13,16 +13,10 @@
     <p>Blackpink <3</p>
     <h2>Hola Mundo desde la instancia con IP: <span id="instance-ip"></span></h2>
 </body>
-
-<script>
-    
-    fetch('/instance-ip')
-        .then(response => response.text())
-        .then(ip => {
-            document.getElementById('instance-ip').textContent = ip;
-        })
-        .catch(error => {
-            console.error('Error al obtener la IP de la instancia:', error);
-        });
-</script>
 </html>
+
+?php
+// Mostrar el nombre del host
+$hostname = gethostname();
+echo "<h1>Host: $hostname</h1>";
+?>
