@@ -99,7 +99,7 @@ jobs:
 
   pull_request_test:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.ref == 'refs/heads/test'
+    if: github.event_name == 'pull_request' && github.head_ref == 'test'
 
     steps:
       # Paso 1: Hacer checkout del repositorio
