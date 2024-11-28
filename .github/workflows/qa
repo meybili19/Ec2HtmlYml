@@ -1,0 +1,36 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - test
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Hacer checkout del repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Paso 2: Configurar la clave SSH para conectar con las EC2
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 3.83.17.47 >> ~/.ssh/known_hosts
+
+      # Paso 3: Desplegar los archivos en la instancia de QA (push en test)
+      - name: Deploy to QA (if test branch)
+        if: github.ref == 'refs/heads/test'
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@3.83.17.47 << 'EOF'
+            cd /home/ec2-user/Ec2HtmlYml || git clone https://github.com/meybili19/Ec2HtmlYml.git
+            cd Ec2HtmlYml
+            git pull origin test
+            sudo cp index.html /var/www/html/
+            sudo systemctl restart nginx
+          EOF
