@@ -3,11 +3,14 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main
       - test
   pull_request:
     branches:
       - main
+    types:
+      - opened
+      - synchronize
+      - closed
 
 jobs:
   deploy_to_qa:
@@ -15,11 +18,9 @@ jobs:
     if: github.ref == 'refs/heads/test'
 
     steps:
-      # Paso 1: Hacer checkout del repositorio
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Paso 2: Configurar la clave SSH para conectar con las EC2
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -30,8 +31,7 @@ jobs:
           ssh-keyscan -H 54.87.132.189 >> ~/.ssh/known_hosts
           ssh-keyscan -H 54.167.140.200 >> ~/.ssh/known_hosts
 
-      # Paso 3: Desplegar los archivos en la instancia de QA (si se hace push en test)
-      - name: Deploy to QA Instance (if test branch)
+      - name: Deploy to QA Instance
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@54.167.140.200 << 'EOF'
             cd /home/ec2-user/Ec2HtmlYml || git clone https://github.com/meybili19/Ec2HtmlYml.git
@@ -44,14 +44,12 @@ jobs:
 
   deploy_to_production:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.event.pull_request.merged == true && github.ref == 'refs/heads/main'
 
     steps:
-      # Paso 1: Hacer checkout del repositorio
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Paso 2: Configurar la clave SSH para conectar con las EC2
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -62,8 +60,7 @@ jobs:
           ssh-keyscan -H 54.87.132.189 >> ~/.ssh/known_hosts
           ssh-keyscan -H 54.167.140.200 >> ~/.ssh/known_hosts
 
-      # Paso 3: Desplegar los archivos en la primera instancia EC2 (si se hace push en main)
-      - name: Deploy to Instance 1 (if main branch)
+      - name: Deploy to Instance 1
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@44.210.128.144 << 'EOF'
             cd /home/ec2-user/Ec2HtmlYml || git clone https://github.com/meybili19/Ec2HtmlYml.git
@@ -74,8 +71,7 @@ jobs:
             sudo systemctl restart nginx
           EOF
 
-      # Paso 4: Desplegar los archivos en la segunda instancia EC2 (si se hace push en main)
-      - name: Deploy to Instance 2 (if main branch)
+      - name: Deploy to Instance 2
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@3.88.111.215 << 'EOF'
             cd /home/ec2-user/Ec2HtmlYml || git clone https://github.com/meybili19/Ec2HtmlYml.git
@@ -86,8 +82,7 @@ jobs:
             sudo systemctl restart nginx
           EOF
 
-      # Paso 5: Desplegar los archivos en la tercera instancia EC2 (si se hace push en main)
-      - name: Deploy to Instance 3 (if main branch)
+      - name: Deploy to Instance 3
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@54.87.132.189 << 'EOF'
             cd /home/ec2-user/Ec2HtmlYml || git clone https://github.com/meybili19/Ec2HtmlYml.git
@@ -97,27 +92,3 @@ jobs:
             sudo cp instance-ip.php /var/www/html/
             sudo systemctl restart nginx
           EOF
-
-  pull_request_test:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.ref == 'refs/heads/test'
-
-    steps:
-      # Paso 1: Hacer checkout del repositorio
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      # Paso 2: Configurar la clave SSH para conectar con las EC2
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H 44.210.128.144 >> ~/.ssh/known_hosts
-          ssh-keyscan -H 3.88.111.215 >> ~/.ssh/known_hosts
-          ssh-keyscan -H 54.87.132.189 >> ~/.ssh/known_hosts
-          ssh-keyscan -H 54.167.140.200 >> ~/.ssh/known_hosts
-
-      # Paso 3: Notificar sobre el pull request
-      - name: Notify pull request status for test branch
-        run: echo "Pull request detected on test branch, ready for review or merge!"
