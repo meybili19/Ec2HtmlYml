@@ -33,7 +33,7 @@ jobs:
       # Paso 3: Desplegar los archivos en la instancia de QA (si se hace push en test)
       - name: Deploy to QA Instance (if test branch)
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@44.210.128.144 << 'EOF'
+          ssh -o StrictHostKeyChecking=no ec2-user@54.167.140.200 << 'EOF'
             cd /home/ec2-user/Ec2HtmlYml || git clone https://github.com/meybili19/Ec2HtmlYml.git
             cd Ec2HtmlYml
             git pull origin test
