@@ -10,23 +10,11 @@
     <h1>Hello world</h1>
     <p>My name is Meybili Olivares, i realized a changes in the main from github </p>
     <h2>Hola Mundo desde la instancia con IP: <span id="instance-ip"></span></h2>
+    <p>Nombre de host: <span id="hostname"></span></p>
 
-</body>
-
-<script>
-    fetch('/instance-ip.php')
-        .then(response => response.text())
-        .then(ip => {
-            document.getElementById('instance-ip').textContent = ip;
-        })
-        .catch(error => {
-            console.error('Error al obtener la IP de la instancia:', error);
-        });
-</script>
-</html>
-
-<?php
-// Mostrar el nombre del host
-$hostname = gethostname();
-echo "<h1>Host: $hostname</h1>";
-?>
+    <script>
+      var hostname = window.location.hostname;
+      document.getElementById("hostname").innerHTML = hostname;
+    </script>
+  </body>
+  </html>
